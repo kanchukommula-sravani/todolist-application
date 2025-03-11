@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+</head>
+<body>
+
+    <h1>To-Do List</h1>
+    <input type="text" id="taskInput" placeholder="Add a new task">
+    <button id="addButton">Add Task</button>
+    <ul id="taskList"></ul>
+
+    <script>
+        const taskInput = document.getElementById('taskInput');
+        const addButton = document.getElementById('addButton');
+        const taskList = document.getElementById('taskList');
+
+        // Load tasks from localStorage
+        const loadTasks = () => {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            taskList.innerHTML = '';  // Clear the list before re-rendering
+            tasks.forEach((task, index) => {
+                createTaskElement(task, index);
+            });
+        };
+
+        // Save tasks to localStorage
+        const saveTasks = (tasks) => {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        };
+
+        // Create a new task element
+        const createTaskElement = (task, index) => {
+            const li = document.createElement('li');
+            li.textContent = task.text;
+            if (task.completed) {
+                li.style.textDecoration = 'line-through';
+            }
+
+            // Mark task as completed on click
+            li.addEventListener('click', () => toggleTaskCompletion(index));
+
+            // Create delete button
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.addEventListener('click', (event) => {
+                event.stopPropagation();
+                deleteTask(index);
+            });
+
+            li.appendChild(deleteButton);
+            taskList.appendChild(li);
+        };
+
+        // Add a task
+        addButton.addEventListener('click', () => {
+            const taskText = taskInput.value.trim();
+            if (taskText) {
+                const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+                tasks.push({ text: taskText, completed: false });
+                saveTasks(tasks);
+                createTaskElement({ text: taskText, completed: false }, tasks.length - 1);
+                taskInput.value = ''; // Clear input field
+            }
+        });
+
+        // Toggle task completion
+        const toggleTaskCompletion = (index) => {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            tasks[index].completed = !tasks[index].completed;
+            saveTasks(tasks);
+            loadTasks(); // Re-render tasks
+        };
+
+        // Delete a task
+        const deleteTask = (index) => {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            tasks.splice(index, 1);
+            saveTasks(tasks);
+            loadTasks(); // Re-render tasks
+        };
+
+        // Initial load of tasks
+        loadTasks();
+    </script>
+
+</body>
+</html>
